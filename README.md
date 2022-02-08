@@ -7,8 +7,11 @@ This package allows operating `pub` command with Java object only and return con
 
 ## Perquisites
 
-* Ensure `dart` and `flutter`'s executable directory in updated in `PATH` already.
-  * Setting Flutter environment variable tutorial: [link](https://docs.flutter.dev/get-started/install/windows#update-your-path) 
+* Create environment variable `WILLPUB_OPIUM_DART_FLUTTER_EXEC`
+  * The first field is Dart executable which is mandatory field
+  * The second field is Flutter executable which is optional
+  * Example: `WILLPUB_OPIUM_DART_FLUTTER_EXEC=/home/user/flutter/bin/dart;/home/user/flutter/bin/flutter`
+  * For Windows user, please uses batch file which ended with `.bat`
 
 ## Setup
 
