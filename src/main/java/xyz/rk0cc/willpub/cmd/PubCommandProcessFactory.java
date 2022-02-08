@@ -28,6 +28,14 @@ import java.util.Objects;
  * @since 1.0.0
  */
 public final class PubCommandProcessFactory {
+    /**
+     * A static boolean option that enable flutter version check after OPIUM execution.
+     * <br/>
+     * It added execution command <code>flutter --version-check</code> in
+     * {@link Runtime#addShutdownHook(Thread) shutdown hook} that will be executed after OPIUM execution flows.
+     */
+    public static boolean RE_ENABLE_FLUTTER_VERSION_CHECK = true;
+
     private static PubCommandProcessFactory INSTANCE = null;
     private File dartSDKExec, flutterSDKExec = null;
 
@@ -46,6 +54,27 @@ public final class PubCommandProcessFactory {
                         || !flutterSDKExec.isAbsolute()
                         || !flutterSDKExec.canExecute()
                 ) throw new IOException("The second 'WILLPUB_OPIUM_DART_FLUTTER_EXEC' should be absolute path of flutter executable");
+
+                // Disable flutter check update during execution under opium
+                Process disableFU = new ProcessBuilder(flutterSDKExec.getPath(), "--no-version-check")
+                        .start();
+
+                if (RE_ENABLE_FLUTTER_VERSION_CHECK)
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        try {
+                            new ProcessBuilder(flutterSDKExec.getPath(), "--version-check")
+                                    .start()
+                                    .waitFor();
+                        } catch (IOException | InterruptedException e) {
+                            throw new RuntimeException("Fail to recover Flutter version check", e);
+                        }
+                    }));
+
+                try {
+                    disableFU.waitFor();
+                } catch (InterruptedException e) {
+                    throw new IOException("Interruption found when waiting disabling Flutter update", e);
+                }
             case 1:
                 // Get Dart SDK.
                 assert !opiumEnv[0].isBlank();
